@@ -1,0 +1,47 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 3 * * *
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/zmkfirmware/zmk-build-arm:2.4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: module
+        timeout-minutes: 1
+      - name: Cache modules
+        uses: actions/cache@v2
+        env:
+          cache-name: modules
+        with:
+          path: |
+            modules/
+            tools/
+            zephyr/
+            bootloader/
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/west.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+        timeout-minutes: 2
+        continue-on-error: true
+      - name: Initialize workspace (west init)
+        run: west init -l module
+      - name: Update modules (west update)
+        run: west update
+        timeout-minutes: 3
+      - name: Build (west build)
+        run: west build -p -c -s module/tests
+      - name: DTS (.dts.pre.tmp)
+        if: ${{ always() }}
+        run: cat -n build/zephyr/*.dts.pre.tmp
+      - name: Kconfig
+        run: cat build/zephyr/.config | grep -v "^#" | grep -v "^$"
