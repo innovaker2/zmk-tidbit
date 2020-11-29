@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13.1)
 
-set(BOARD native_posix)
-set(SHIELD zmk_module)
+set(BOARD nice_nano)
+set(SHIELD tidbit_19key)
 
 find_package(zmk REQUIRED HINTS ../../zmk)
 find_package(Zephyr REQUIRED HINTS ../../zephyr)
