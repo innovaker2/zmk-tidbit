@@ -1,0 +1,6 @@
+manifest:
+  projects:
+    - name: zmk
+      url: https://github.com/innovaker/zmk
+      revision: modular
+      import: true
